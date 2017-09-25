@@ -1,0 +1,3 @@
+if (self.CavalryLogger) { CavalryLogger.start_js(["o+iD\/"]); }
+
+__d('EntstreamGroupFeedObjectOptionsMenu',['EntstreamFeedObjectFollow','EntstreamFeedObjectHide','SubscriptionsHandler','ge','onEnclosingPageletDestroy'],(function a(b,c,d,e,f,g){'use strict';function h(i,j,k){var l,m=i.subscribe('itemclick',function(o,p){switch(p.item.getValue()){case 'markspam':c('EntstreamFeedObjectHide').hide(j);break;case 'report':break;case 'follow_post':case 'unfollow_post':c('EntstreamFeedObjectFollow').toggleFollow(p.item,j,k);break;}}),n=c('ge')(j);if(n)(function(){var o=new (c('SubscriptionsHandler'))();o.addSubscriptions(m,c('onEnclosingPageletDestroy')(n,function(){i.done();i.destroy();o.release();}));})();}f.exports=h;}),null);

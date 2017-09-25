@@ -1,0 +1,21 @@
+# depslib dependency file v1.0
+1480886527 source:/home/mateusz/doc/c/sort/main.c
+	<stdio.h>
+	"sort_check.h"
+
+1480883794 /home/mateusz/doc/c/sort/sort_check.h
+	<stdio.h>
+	<stdlib.h>
+	<time.h>
+	<stdbool.h>
+
+1480883939 source:/home/mateusz/doc/c/sort/sort_check.c
+	"sort_check.h"
+
+1480878927 /home/mateusz/doc/c/sort/select_sort.h
+	<stdlib.h>
+	<stdio.h>
+
+1480878964 source:/home/mateusz/doc/c/sort/select_sort.c
+	"select_sort.h"
+

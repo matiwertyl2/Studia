@@ -1,0 +1,12 @@
+# depslib dependency file v1.0
+1480444519 source:/home/mateusz/doc/c/kolejka/main.c
+	"queue.h"
+
+1480443568 /home/mateusz/doc/c/kolejka/queue.h
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+
+1480443900 source:/home/mateusz/doc/c/kolejka/queue.c
+	"queue.h"
+

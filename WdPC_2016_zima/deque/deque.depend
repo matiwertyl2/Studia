@@ -1,0 +1,17 @@
+# depslib dependency file v1.0
+1481464164 source:/home/mateusz/doc/c/deque/deque.c
+	"deque.h"
+	<math.h>
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+
+1481292626 /home/mateusz/doc/c/deque/deque.h
+	<stdbool.h>
+
+1481464112 source:/home/mateusz/doc/c/deque/main.c
+	<stdio.h>
+	<stdlib.h>
+	"deque.h"
+	<stdbool.h>
+

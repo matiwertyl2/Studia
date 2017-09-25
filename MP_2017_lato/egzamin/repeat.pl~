@@ -1,0 +1,3 @@
+from(N, N).
+
+from(N, M) :- N1 is N+1, from(N1, M).

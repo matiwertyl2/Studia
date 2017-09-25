@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1479661880 source:/home/mateusz/doc/c/zajecia_5/zbiory/main.c
+	<stdio.h>
+	<stdlib.h>
+	"zbiory.h"
+
+1479660884 /home/mateusz/doc/c/zajecia_5/zbiory/zbiory.h
+	<stdio.h>
+	<stdbool.h>
+
+1479661869 source:/home/mateusz/doc/c/zajecia_5/zbiory/zbiory.c
+	"zbiory.h"
+

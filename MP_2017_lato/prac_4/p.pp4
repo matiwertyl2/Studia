@@ -1,0 +1,4 @@
+input a in let a=true in
+  if a then 1
+  else
+    2+true

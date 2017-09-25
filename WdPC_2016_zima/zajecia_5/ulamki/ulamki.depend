@@ -1,0 +1,14 @@
+# depslib dependency file v1.0
+1479651893 source:/home/mateusz/doc/c/zajecia_5/ulamki/ulamki.c
+	"ulamki.h"
+
+1479652084 /home/mateusz/doc/c/zajecia_5/ulamki/ulamki.h
+	<stdio.h>
+	<limits.h>
+	<stdbool.h>
+
+1479651863 source:/home/mateusz/doc/c/zajecia_5/ulamki/main.c
+	<stdio.h>
+	<stdlib.h>
+	"ulamki.h"
+

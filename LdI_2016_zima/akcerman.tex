@@ -1,0 +1,42 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{polski}
+\usepackage{amsfonts}
+
+\title{Zadanie 570.}
+\author{Mateusz Hazy }
+\date{Grudzień 2016}
+
+\begin{document}
+
+\maketitle
+\section{Treść}
+	Rozważmy funkcję Ackermanna zdefiniowaną wzorem \newline
+    $$ A (x, y) =\left\{ \begin{array}{ll}
+    y+1 \ dla  & \textrm{$x = 0$}\\
+    A (x-1, 1) & \textrm{dla $x>0 \ i \ y=0$}\\
+    A(x-1, A(x, y-1)) &  \textrm{wpp}
+    \end{array} \right.
+    $$
+    Udowodnij indukcyjnie, że dla wszystkich $ \langle x, y \rangle \in \mathbb{N}\times\mathbb{N} $  obliczanie funkcji $A(x,y)$ się nie zapętla.
+\section{Rozwiązanie}
+
+	\par \hspace{0.4cm} Rozumowanie indukcyjne będziemy przeprowadzać na porządku leksykograficznym par
+	$ \langle x, y \rangle \in \mathbb{N}\times\mathbb{N} $, który jest dobrym porządkiem.
+	\begin{enumerate}
+	\item Z definicji funkcji A wiemy, że dla par $ \langle 0, y \rangle \in \mathbb{N}\times\mathbb{N} $ obliczanie $A(0, y)$ nie zapętli się. 
+	\item Założenie indukcyjne : Dla każdej pary $ \langle x, y \rangle \in \mathbb{N}\times\mathbb{N}, x<n $, gdzie $n \in \mathbb{N}$, obliczanie $A(x, y)$ się nie zapętla. 
+	\par Teza indukcyjna: Dla par $ \langle n, y \rangle, y \in \mathbb{N} $ $ A(n, y)$ nie zapętla się. \newline
+	Dowód: 
+		\begin{enumerate}
+	\item $ A(n, 0) = A (n-1, 1) $, więc z założenia indukcyjnego się nie zapętla. 
+	\item Załóżmy teraz, że dla każdej pary $ \langle n, y \rangle \in \mathbb{N}\times\mathbb{N}, y<m $, 	gdzie $m \in \mathbb{N}$, obliczanie $A(n, y)$ nie zapętla się. 
+	\par Pokażemy, że z $(a)$, $(b)$ i założenia indukcyjnego wynika, że $A(n, m)$ nie zapętla się. 
+	 \par $A(n, m)= A (n-1, A(n, m-1))$.
+	\par Z $(b)$ $A(n, m-1)$ nie zapętla się, więc ma jakąś wartość. 
+	\par Niech $A(n, m-1)= c, c \in \mathbb{N}$. 
+	\par $A(n, m)= A (n-1, c)$, a z założenia indukcyjnego $A(n-1, c)$ nie zapętla się. 
+	\par To oznacza, że dla każdego $y$ $A(n, y)$ nie zapętla się.
+	\end{enumerate}
+	\end{enumerate}
+\end{document}
