@@ -1,0 +1,169 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{polski}
+\usepackage{amsfonts}
+\usepackage{listings, lstautogobble}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\graphicspath{ {./} }
+
+\usepackage[margin=1in]{geometry}
+\newgeometry{margin=1in}
+
+\lstset{
+	autogobble=true
+}
+
+\newtheorem{theorem}{Twierdzenie}
+\newcommand{\plot}[1] {
+	\includegraphics[width=\textwidth]{#1}
+}
+
+\title{\textbf{Pracownia z analizy numerycznej} \\ Sprawozdanie do zadania \textbf{P1.2}}
+\author{Prowadzący: dr Rafał Nowak \\ Mateusz Hazy}
+\date{Wrocław, dnia 3 listopada 2017}
+\begin{document}
+	\maketitle
+	\section{Wstęp}
+	Jednym z podstawowych problemów numerycznych jest utrata dokładności wraz ze wzrostem liczby wykonanych operacji arytmetycznych. Błąd spowodowany jest sposobem maszynowej reprezentacji liczb, jednak poprzez wybór odpowiedniej kolejności, precyzji arytmetyki oraz sposobu wykonywania działań arytmetycznych można go zminimalizować. 
+		\par
+			Celem niniejszego sprawozdania jest sprawdzenie i porównanie jakości wyników w zależności od wyboru metody obliczania.
+		\par W dalszych rozdziałach zostały przedstawione wyniki sumowania ciągów $\frac{1}{n}$ oraz $\frac{1}{n^2}$ oraz błędy względne jakie pojawiły się podczas obliczeń.
+	\section{Opis eksperymentu}
+		\par Sumowanie ciągów zostało przeprowadzone na 3 różne sposoby:
+		\begin{itemize}
+			\item Zwykłe sumowanie 
+			\item Sumowanie w odwrotnej kolejności
+			\item Sumowanie za pomocą algorytmu sumacyjnego Kahana:
+		
+				\begin{lstlisting}[frame=single]
+					function Kahan(input, n)
+						sum = input[1]
+						c = 0
+						for i = 2 to n
+							y = c + input[i]
+							t = sum + y 
+							c = (sum - t) + y 
+							sum = t
+						end
+						return sum
+					end  
+				\end{lstlisting}
+		\end{itemize}
+		
+		\textbf{Wyjaśnienie:} 
+			\par $t = sum + y$ - część bitów $y$ zostanie utracona 
+			\par $(sum-t) = -y$ ze straconymi bitami 
+			\par $(sum-t) + y =$ stracone bity $y$, które mogą zostać dodane w następnych iteracjach \\
+		
+		Dla ciągu $\frac{1}{n^2}$ zostało zsumowanych $10^4$, natomiast dla $\frac{1}{n}$ - $10^7$ elementów. Działania zostały 				        przeprowadzone w arytmetyce Float32 oraz Float64.
+
+	\section{Przewidywane wyniki}
+	 
+	 \subsection{Kolejność sumowania}
+	 Rozważmy błąd powstały przy maszynowym dodawaniu 2 liczb: \\
+	 	$$ fl(x+y) = (x+y)(1 + \xi)$$ gdzie $|\xi|$ nie przekracza precyzji arytmetyki. $ (u, 2^{-t} ) $ \\
+	 Operator $+$ łączy w lewo, więc:
+	 	$$ fl(s) = fl(\sum\limits_{i=1}^n x_{i}) = fl( fl(\sum\limits_{i=1}^{n-1} x_{i}) + x_{n}) =
+	 		( fl(\sum\limits_{i=1}^{n-1} x_{i}) + x_{n} )(1 + \xi_{n}) $$
+	 Łatwo zauważyć, że:
+	 	$$ fl(s) = \sum\limits_{i=1}^n ( x_{i} \prod_{j=i}^n (1+ \xi_{j}) ) $$
+	 Rozważmy pesymistyczny przypadek, gdy $\xi_{1} = \xi_{2} = ... = \xi_{n} = u $ \\
+	 Wtedy:
+	 	$$ fl(s) = \sum\limits_{i=1}^n x_{i}(1 + u)^{n-i+1} $$
+	 Widać, że początkowe elementy sumy obarczone są największym błędem. \\
+	 Intuicyjnie:
+	 \par Mamy n liczb ($x_{i}$) oraz n współczynników ($a_{j}$). Każdej liczbie należy przyporządkować współczynnik tak, aby $ \sum a_{j}x_{i}$ była jak najmniejsza. Jeśli więc najmniejszym $x_{i}$ przyporządkujemy największe $a_{i}$ to intuicyjnie suma będzie najmniejsza.
+	 \begin{theorem}
+	 	Niech $0 < x_{1} < x_{2} < ... < x_{n} $ oraz $ a_{1} >  a_{2} > ... > a_{n} > 0 $ \\
+	 	$ \sigma $ - permutacja n-elementowa. \\
+	 	Wówczas wartość $S(\sigma) = \sum\limits_{i=1}^n a_{\sigma(i)}x_{i}$  jest najmniejsza, gdy $\sigma = id$
+	 \end{theorem}
+	 
+	 \begin{proof}
+	 	Nie wprost. \\
+	 	Załóżmy, że dla pewnej $\sigma \neq id$, $S(\sigma)$ jest najmniejsze. 
+	 	Weźmy najmniejsze takie i, że $\sigma(i) \neq i$. Wtedy $\sigma(i) = j, j > i$ \\
+	 	Niech:
+	 	$$ s_{1} = a_{j}x_{i} + a_{i}x_{k} , \ \sigma(k) = i, \text{ więc } k > i $$
+	    $$ s_{2} = a_{i}x_{i} + a_{j}x_{k}$$
+	 	Wówczas: $$ s_{1} - s_{2} = (a_{j} - a_{i})x_{i} + (a_{i}- a_{j})x_{k} = 
+	 				(x_{k} - x_{i})(a_{i} - a_{j}) \ge 0 $$
+	 	Niech:
+	 		$$ \sigma'(x) =\left\{ \begin{array}{ll}
+    \sigma(x) \ dla  & \textrm{$x \neq i, k$}\\
+    i & \textrm{dla $x = i$}\\
+    j &  \textrm{dla $x = k$}
+    \end{array} \right.
+    $$
+    Wówczas:
+    		$$ S(\sigma) - S(\sigma') = s_{1} - s_{2} > 0 \text{, co przeczy minimalności } S(\sigma) $$
+	 \end{proof}
+	 
+	Analogicznie można pokazać, że suma będzie największa, jeśli współczynniki $a_{i}$ posortujemy rosnąco.
+	
+	\par Można się więc spodziewać, że w przypadku malejęcych ciągów, zwykłe sumowanie będzie mniej dokładne, niż sumowanie w odwrotnej kolejności. Co więcej, posortowanie elementów ciągu rosnąco da najlepsze wyniki, a malejąco - najgorsze.
+	\subsection{Algorytm Sumacyjny Kahana}
+		Dowodzi się, że:
+		$$ Kahan(s) = \sum\limits_{i=1}^n (1+ \xi_{i})x_{i} \text{, gdzie } 
+		|\xi_{i}| \le 2 \cdot 2^{-t} +  \mathcal{O}(n2^{-2t})$$
+		Natomiast:
+		$$ Suma(s) = \sum\limits_{i=1}^n (1 + \psi_{i})x_{i} \text{, gdzie } 
+		|\psi_{i}|  \approx \mathcal{O}(n2^{-t})$$
+		gdzie \textit{Kahan, Suma} są odpowiednio algorytmem sumacyjnym Kahana i zwykłym sumowaniem. 
+		\par Można się spodziewać, że wyniki uzyskane za pomocą algorytmu Kahana będą najdokładniejsze. Dla $n < 2^t$ błąd względny wyniku można oszacować przez $3 \cdot 2^{-t}$.
+	
+	\section{Wyniki doświadczalne}
+	\subsection{Sumowanie ciągu $\frac{1}{n^2}$}
+	Poniżej przedstawione zostały wykresy błędu względnego sumowania ciągu $\frac{1}{n^2}$ w zależności od liczby zsumowanych elementów przy użyciu arytmetki Float32 oraz Float64. \\
+	\plot{flsmallsquareone.png}
+	\plot{flsmallsquaretwo.png}
+	\plot{flbigsquareone.png}
+	\plot{flbigsquarethree.png}
+	\subsection{Sumowanie ciągu $\frac{1}{n}$}
+	\textbf{Motywacja} \\
+	W przeciwieństwie do ciągu $\frac{1}{n^2}$, ciąg $\frac{1}{n}$ jest rozbieżny, dzięki czemu błąd bezwględny może być dowolnie duży, więc możliwe, że błędy względne też będą większe, niż w przypadku ciągu $\frac{1}{n^2}$. \\
+	\plot{flsmalllinone.png}
+	\plot{flsmalllintwo.png}
+
+	\subsection{Wnioski}
+	
+	\begin{itemize}
+		\item Dokładności poszczególnych sumowań są zgodne z przewidywaniami.
+		\item Wykresy nie są monotoniczne, więc błędy są w pewnym stopniu losowe.
+		\item Przy sumowaniu w odwrotnej kolejności końcowy błąd względny był zaskakująco mały - porównywalny do błędu przy sumowaniu algorytmem Kahana. Jednak na podstawie wykresów można zauważyć, że przez większą część sumowania (sumowanie mniejszych składników), błąd był duży.
+		\item Błąd względny sumowania algorytmem Kahana był rzędu: \\
+			- $10^{-8}$ dla arytmetyki Float32 \\
+			- $10^{-17}$ dla arytmetyki Float64 \\
+		 Jak widać, około dwukrotne zwiększenie precyzji dało około dwukrotnie dokładniejszy wynik.
+		 \item Sumowanie ciągu $\frac{1}{n}$ odniosło oczekiwany efekt. Dla arytmetyki Float32 uzyskany błąd względny był istotnie większy niż przy sumowaniu ciągu $\frac{1}{n^2}$. Faktem jest, że dla ciągu $\frac{1}{n^2}$ zsumowanych zostało $10^4$ elementów, a dla ciągu $\frac{1}{n}$ - $10^7$ elementów. Jednak dalsze elementy ciągu $\frac{1}{n^2}$ są tak małe, że w precyzji Float32 nie zostałyby dodane do sumy. Z drugiej strony ciąg ten jest zbieżny, więc błąd względny nie zwiększyłby się znacząco.
+	\end{itemize}
+	
+	\section{Asymptotyka błędu algorytmu Kahana}
+	Do doświadczalnego wyznaczenia asymptotycznego błędu względnego przy sumowaniu algorytmem Kahana zostały użyte wyniki sumowania ciągu $\frac{1}{n}$ w arytmetyce Float32. \\
+	\textbf{Hipoteza} \\
+	$$ fl(s) = \sum\limits_{i=1}^n (1+\xi_{i})x_{i} \ , \ gdzie \ |\xi_{i}| \le 2^*2^{-t} + \mathcal{O}(n 			2^{-2t}) \ , \ \sum\limits_{i=1}^n x_{i} = s  $$
+	Niech:
+	$$ \xi_{i} = \xi_{j} = \xi \text{, dla każdych i, j}  $$
+	$$ \xi = \mathcal{O}(n 2^{-2t})  $$
+	Po przekształceniu wzoru :
+	$$ \xi = \frac{fl(s) - s}{s} $$ 
+	$$ F(n) = \frac{\xi}{n2^{-2t}} = \mathcal{O}(1) $$
+	Należy sprawdzić, czy dla dużych wartości n ostatnia równość jest prawdą.
+
+	\plot{kahan.png}
+	
+	Na powyższym wykresie można zauważyć, że wartości $F(n)$ dążą do pewnej stałej dla dużych n. Można z tego wywnioskować, że asymptotyczne tempo wzrostu błędu względnego przy sumowaniu algorytmem Kahana wynosi $ \mathcal{O}(n  2^{-2t}) $.
+	
+\section{Literatura}
+
+\begin{enumerate}
+	\item \url{https://en.wikipedia.org/wiki/Kahan_summation_algorithm}
+	\item Rafał Nowak, \textit{Analiza numeryczna 1. Analiza błędów}, Wrocław 2017
+	\item Mateusz Hazy, \textit{Notatki do wykładu z Analizy Numerycznej}, Wrocław 2017
+\end{enumerate}
+
+\end{document}
