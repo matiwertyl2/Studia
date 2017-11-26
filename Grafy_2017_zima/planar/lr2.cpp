@@ -240,26 +240,6 @@ bool belongs_to_cycle(edge dest, edge b) {
   return e == dest;
 }
 
-int get_lowest_cycle(edge e, int dir) {
-  int res=10000000;
-  for (auto b : edges) {
-    if (b.back && belongs_to_cycle(e, b) && b.direction==dir) {
-      res = min (res, b.lowpoint);
-    }
-  }
-  return res;
-}
-
-int get_highest_cycle(edge e, int dir) {
-  int res=-1;
-  for (auto b : edges) {
-    if (b.back && belongs_to_cycle(e, b) && b.direction==dir) {
-      res = max (res, b.lowpoint);
-    }
-  }
-  return res;
-}
-
 pair<int,int> tree_dir (edge e) { // first - depth, second - direction
   pair<int, int> res = make_pair(0, 0);
 /*  for (auto u : G[e.b]) {
@@ -273,17 +253,12 @@ pair<int,int> tree_dir (edge e) { // first - depth, second - direction
       }
     }
   } */
-  // this is workaround, maybe heuristic
-  int lmin = get_lowest_cycle(e, 0);
-  int rmin = get_lowest_cycle(e, 1);
-  int lmax = get_highest_cycle(e, 0);
-  int rmax = get_highest_cycle(e, 1);
-  if (lmax != rmax ) {
-    if (lmax > rmax) return make_pair(0, 0);
-    else return make_pair(1, 1);
+  for (auto b : edges) {
+    if (b.back && belongs_to_cycle(e, b)) {
+      res = max (res, make_pair(b.lowpoint, b.direction));
+    }
   }
-  if (lmin < rmin ) return make_pair(0, 0);
-  return make_pair(1, 1);
+  return res;
 }
 
 void assign_direction() {
@@ -297,7 +272,6 @@ void assign_direction() {
   }
   for (size_t i=0; i<edges.size(); i++) {
     edge e = edges[i];
-
     if(e.back==false) e.direction= tree_dir(e).second;
     edgesMap[{e.a, e.b}]=e;
     edges[i]=e;
@@ -590,12 +564,9 @@ int main () {
       if (succ==false) break;
     }
   }
-  cout << "BBBBBBBB ----------------\n";
-  cout << branching_point(edgesMap[{14, 2}], edgesMap[{3, 1}]) << "\n";
   if (succ) {
     cout << "TAK\n";
     assign_direction();
-
     count_nesting_numbers();
     for (int i=1; i<=n; i++) clockwise_sort(i);
     printT();

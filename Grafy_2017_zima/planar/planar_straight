@@ -1,0 +1,14 @@
+Żeby narysowac planarny graf (spojny) z wszystkimi krawedziami jako proste 
+
+	1. Triangulacja grafu (wszystkie cykle indukowane dl 3)
+		- przypisac kazdej back-edge orientacje (L, R)
+		- triangulowac kazdy cykl fundamentalny (L, R osobno)
+		- znalezc krawedzie sciany zewnetrznej - stworza "drzewo" moga byc cykle ktore mozna reprezentowac jako wierzholki, cos jak 			  kaktus, (cykle + mosty). idziemy dfsem i dla kazdej krawedzi v -> u robimy wierzcholek w i krawedzie v w i u w, dla     		          mostow takie cos podwojnie (drugi raz wychodzac) . Potem laczymy w cykl wszystkie w i triangulujemy od jednego     			  wierzcholka (dowolnego) caly cykl.
+	2. Niech a, b, c - wierzcholki zewnetrzne.
+	   Weźmy v != a, b, c, taki ze deg(v) <= 5 ( tw Eulera, zawsze taki jest).
+ 	   usunac go i jego krawedzie. powstanie maksymalnie pieciokat. triangulowac czworo lub pieciokat kotry powstal.
+	   rekurencyjnie dla nowego grafu znalezc reprezentacje.
+		Usunac niepotrzebne krawedzie (maks 2). w pieciokacie, (czworo tez) zqwsze znajdzie sie punkt z ktorego mozna linie proste 
+	        do wszystkich wierzcholkow. znalezc ten punkt i to bedzie miejsce v.
+       3. usunac krawedzie i wierzcholki dodane w triangulacji.
+	4. beng
