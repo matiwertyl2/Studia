@@ -1,0 +1,16 @@
+\BOOKMARK [1][-]{section.1}{Wstep}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Opis problemu}{section.1}% 2
+\BOOKMARK [1][-]{section.2}{Metody rozwiazywania uk\233adu}{}% 3
+\BOOKMARK [2][-]{subsection.2.1}{Metoda Newtona}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.2}{Metoda algebraiczna}{section.2}% 5
+\BOOKMARK [1][-]{section.3}{Teoretyczne Testy}{}% 6
+\BOOKMARK [2][-]{subsection.3.1}{Dok\233adnosc na losowej sciezce}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.2}{Liczba iteracji w metodzie Newtona}{section.3}% 8
+\BOOKMARK [2][-]{subsection.3.3}{Skutecznosc metod}{section.3}% 9
+\BOOKMARK [2][-]{subsection.3.4}{Losowe punkty na Ziemi}{section.3}% 10
+\BOOKMARK [2][-]{subsection.3.5}{ B\233ad zegara }{section.3}% 11
+\BOOKMARK [1][-]{section.4}{Metoda najmniejszych kwadrat\363w}{}% 12
+\BOOKMARK [1][-]{section.5}{Praktyczne testy}{}% 13
+\BOOKMARK [2][-]{subsection.5.1}{Skutecznosc metod}{section.5}% 14
+\BOOKMARK [2][-]{subsection.5.2}{Liczba satelit}{section.5}% 15
+\BOOKMARK [1][-]{section.6}{Wnioski}{}% 16
