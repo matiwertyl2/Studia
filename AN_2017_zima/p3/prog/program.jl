@@ -5,17 +5,25 @@ function ChebEval(k, x)
     return cos(k*acos(x))
 end
 
+### ewaluacja Y w punkcie x
+function YSingleEval(coeffs, x)
+    sum([coeffs[i]*ChebEval(i-1, x) for i=1:length(coeffs)]) - coeffs[1]/2
+end
+
 ### ewaluacja funkcji Y w punkatch uk
 ### Y przedstawiona jako ciag wielomianow czebyszewa (trzymane wspolczynniki)
 function YEval(coeffs, N)
-    restmp = [ sum([coeffs[i]*ChebEval(i-1, cos((k-1)*pi/N)) for i=1:length(coeffs) ]) for k=1:(N+1) ]
-    [ restmp[i] - coeffs[1]/2 for i=1:(N+1)] ### suma z primem
+    [ YSingleEval( coeffs, cos((k-1)*pi/N) ) for k=1:(N+1) ]
+end
+
+function YValues(Y, i)
+    [Y[k][i] for k = 1:length(Y)]
 end
 
 ### ewaluacja funkcji F w punkatch uk F(y, x)
 ### Y - wartosci y w uk
 function FEval(f, Y, N)
-    [f(Y[i], cos((i-1)*pi/N)) for i=1:(N+1)]
+    [f(YValues(Y, i), cos((i-1)*pi/N)) for i=1:(N+1)]
 end
 
 function discreteCoeff(F, r, N)
@@ -30,11 +38,9 @@ end
 
 ### y - funkcja jako lista wspoczynnikow ciagu czebyszewa
 function FApprox(f, y, N)
-    Y = YEval(y, N)
+    Y = [YEval(y[i], N) for i=1:length(y)]
     F = FEval(f, Y, N)
-    println("Values ", F)
     Fapp = [discreteCoeff(F, i-1, N) for i=1:(N+1)]
-    println(YEval(Fapp, N))
     Fapp
 end
 
@@ -51,31 +57,92 @@ function ChebIntegral(f, x0, y0, N)
     A
 end
 
-function PicardIter(f, x0, y0, N, R)
-    Y = [2*y0]
-    for i=1:R
-        F = FApprox(f, Y, N)
-        Y = ChebIntegral(F, x0, y0, N)
-        println("IN X0 ", YSingleEval(Y, 0))
+
+### szczegolny przypadek uogolnionej metody - rownanie pierwszego rzedu
+function PicardIter(f, x0, y0, N, Y)
+    function farr(arr, x)
+        y = arr[1]
+        f(y, x)
     end
-    return Y
+    PicardIterG(farr, [x0], [y0], N, Y)
 end
+
+### x0, y0 - tablice warunkow poczatkowych
+### y0[1] wartosc najwyzszej pochodnej w rownaniu w punkcie x0[1]
+function PicardIterG(f, x0, y0, N, Y)
+    F = FApprox(f, Y, N)
+    Y[1] = ChebIntegral(F, x0[1], y0[1], N)
+    for i = 2:length(Y)
+        Y[i] = ChebIntegral(Y[i-1], x0[i], y0[i], N+i-1)
+    end
+    Y
+end
+
+
+### petla iteracji Picarda dla ustalonej liczby iteracji
+function PicardLoopG(f, x0, y0, N, R)
+    Y = [ [2*y0[i]] for i=1:length(y0)]
+    iters = [Y[end]]
+    for iter=1:R
+        Y = PicardIterG(f, x0, y0, N, Y)
+        push!(iters, Y[end])
+    end
+    iters
+end
+
+function PicardLoop(f, x0, y0, N, R)
+    function farr(arr, x)
+        y = arr[1]
+        f(y, x)
+    end
+    PicardLoopG(farr, [x0], [y0], N, R)
+end
+
+
+### funkcja znajdujaca najwiekszy modul z roznicy
+### wspolczynników kolejnych przyblizen funkcji w iteracji
+function norminf(A, B)
+    n = min(length(A), length(B))
+    m = maximum([abs( A[i]-B[i] ) for i=1:n])
+    for i=(n+1):length(A)
+        m = max(m, abs(A[i]))
+    end
+    for i=(n+1):length(B)
+        m = max(m, abs(B[i]))
+    end
+    m
+end
+
+### iteracja Picarda do momentu uzyskania wymaganej dokładnosci
+function PicardLoopG_conv(f, x0, y0, N; e=0.001)
+    Y = [ [2*y0[i]] for i=1:length(y0)]
+    Yprev = []
+    iters = 0
+    while true
+        iters += 1
+        Yprev = copy(Y)
+        Y = PicardIterG(f, x0, y0, N, Y)
+        if (norminf(Y[end], Yprev[end]) < e)
+            break
+        end
+    end
+    Y[end], iters
+end
+
+function PicardLoop_conv(f, x0, y0, N; e=0.001)
+    function farr(arr, x)
+        y = arr[1]
+        f(y, x)
+    end
+    PicardLoopG_conv(farr, [x0], [y0], N, e=e)
+end
+
+
 
 ### utils
-function YSingleEval(coeffs, x)
-    sum([coeffs[i]*ChebEval(i-1, x) for i=1:length(coeffs)]) - coeffs[1]/2
-end
 
 function ChebDraw(Y, a, b, n)
-    res = [[],[]]
-    x = a
-    dx = (b-a)/n
-    while x <= b
-        push!(res[1], x)
-        push!(res[2], YSingleEval(Y, x))
-        x+=dx
-    end
-    res
+    FDraw(x -> YSingleEval(Y,x), a, b, n)
 end
 
 function FDraw(f, a, b, n)
@@ -91,35 +158,3 @@ function FDraw(f, a, b, n)
 end
 
 ###
-
-function myabs(x)
-    if x < 0
-        return 0
-    end
-    return x
-end
-function f(y, x)
-    4*cos(4*x)
-end
-
-
-###
-### x -> 2sin(x)/cos(x) -2*sin(x)^3/(3*cos(x)) + 1/cos(x)
-###     2*(cos(x)^2) + y*tan(x)
-### y(0) = 1
-
-### x -> e^(-2x) + (e^(3x))/5
-### e^(3x) - 2y
-### y(0) = 1+ 1/5
-
-
-
-Y = PicardIter(f, 0, 0,20, 3)
-
-data = ChebDraw(Y, -1, 1, 500)
-datae = FDraw(x -> sin(4*x), -1, 1, 500)
-fig, ax = subplots()
-ax[:plot](data[1], data[2], "-", color="red", label="approx", linewidth=1, alpha=1.0)
-ax[:plot](datae[1], datae[2], "-", color="blue", label="real", linewidth=1, alpha=1.0)
-#ax[:plot](data[1], data[2]-datae[2], "-", color="blue", linewidth=1, alpha=1.0)
-show()

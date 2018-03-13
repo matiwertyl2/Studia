@@ -1,0 +1,550 @@
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+\usepackage{graphicx} % Required for the inclusion of images
+
+\usepackage[utf8]{inputenc}
+\usepackage[OT4,plmath]{polski}
+
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools}
+\usepackage{xfrac}
+
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{array}
+\usepackage[flushleft]{threeparttable}
+
+\usepackage{comment}
+
+\usepackage{listings, lstautogobble}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\usepackage{geometry}
+ \geometry{
+ a4paper,
+ total={170mm,257mm},
+ right=35mm,
+ left=35mm,
+ top=20mm,
+ }
+
+\newtheorem{theorem}{Twierdzenie}
+\newtheorem{lemma}{Lemat}
+
+\newcommand{\plot}[1] {
+	\includegraphics[width=\textwidth]{#1}
+}
+\newcommand{\sumprim}[3] {
+	\sideset{}{'}\sum_{#1}^{#2} #3
+}
+\newcommand{\sumbis}[3] {
+	\sideset{}{''}\sum_{#1}^{#2} #3
+}
+
+\newcommand{\dotproduct}[2] {
+	\langle #1 , #2 \rangle
+}
+
+\newcommand{\chebu}[1] {
+	\cos{ \frac{ #1 \pi }{N} }
+}
+
+\newcommand{\todo}[1] {
+	\textbf{TODO : } #1 \\
+}
+
+\graphicspath{ {./} }
+\setlength\parskip{4pt}
+\setlength\parindent{0pt}
+\setlength{\tabcolsep}{8pt}
+\renewcommand{\arraystretch}{1.5}
+% \setlength{\tabcolsep}{8pt}
+% \renewcommand{\arraystretch}{1.5}
+
+%\usepackage{times} % Uncomment to use the Times New Roman font
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT INFORMATION
+%----------------------------------------------------------------------------------------
+
+\title{\LARGE\textbf{Pracownia z analizy numerycznej} \\ Sprawozdanie do zadania \textbf{P3.1} \\
+\vskip 0.2cm \large Prowadzący: dr Rafał Nowak\\
+\author{Mateusz \textsc{Hazy}}}
+\date{Wrocław, \today}
+
+\begin{document}
+\maketitle
+
+
+\section{Wstęp}
+
+\par Rozwiązywanie równań różniczkowych jest szczególnie istotnym problemem ze względu na szerokie zastosowanie w opisywaniu rzeczywistości. Równania mechaniki klasycznej, zasad dynamiki, falowe, Einsteina, Maxwella i wiele innych kluczowych dla fizyki równań ma postać różniczkową. Istnieją metody rozwiązywania równań różczniczkowych pewnych szczególnych typów, jednak w ogólności jest to bardzo trudne. Niniejsze sprawozdanie ma na celu opisanie numerycznej metody znajdowania rozwiązań równań różniczkowych opracowanej przez C. W. Clenshawa i H. J. Nortona oraz przetestowanie tej metody w praktyce.
+
+\section{Opis problemu}
+
+Będziemy rozważać równania różniczkowe postaci:
+
+\begin{equation}
+	\label{eq:diff}
+	y'(x) = f(y(x), x) \text{ z warunkiem początkowym } y(\xi) = \eta 
+\end{equation}
+
+zwane równaniami różniczkowymi pierwszego rzędu.
+
+\par Naszym celem będzie przybliżenie funkcji $y$ na przedziale $[-1, 1]$
+
+\par Metoda Clenshawa-Nortona opiera się o przedstawienie funkcji jako kombinacji liniowej wielomianów Czebyszewa oraz iterację punktu stałego zwaną iteracją Picarda. W następnych rozdziałach zajmiemy się własnościami wielomianów Czebyszewa, aproksymacji średniokwadratowej oraz iteracji Picarda potrzebnych do wyprowadzenia metody Clenshawa-Nortona.
+
+\section{Iteracja Picarda}
+	
+	Aby zastosować iterację Picarda, należy przekształcić równanie (\ref{eq:diff}) do postaci całkowej. 
+	
+	\begin{theorem}
+	Równanie
+	$$ y'(x) = f(y(x), x) \quad y(\xi) = \eta $$
+	
+	Jest równoważne równaniu
+	$$ y(x) = \eta + \int_{\xi}^{x} f(y(t), t) dt $$
+	\end{theorem}
+	
+	\begin{proof}
+		$$ y'(x) = f(y(x), x) $$
+		$$ \int_{\xi}^{x} y'(t) dt = \int_{\xi}^{x} f(y(t), t) dt $$
+		$$ y(x) - y(\xi) = \int_{\xi}^{x} f(y(t), t) dt $$
+		$$ y(x) = \eta + \int_{\xi}^{x} f(y(t), t) dt $$
+	\end{proof}
+	W iteracji Picarda tworzony jest ciąg funkcji $ y_{i}(x) , \{ i=0,1,2 \ldots \} $ zadany wzorem:	
+		\begin{equation}
+			\label{eq:picard}
+			y_0 = \eta , \quad y_i = \eta + \int_{\xi}^{x} f(y_{i-1}(t), t) dt
+		\end{equation}
+		
+	\subsection{Zbieżność iteracji}
+		Można pokazać, że w szczególnych przypadkach iteracja jest zbieżna, jednak w ogólnym przypadku nie należy się tego spodziewać. Dalsze rozważania na temat zbieżności iteracji Picarda można znaleźć w pozycjach \cite{article} oraz \cite{picard}.
+	
+	
+\section{Wybrane własności wielomianów Czebyszewa}
+
+Poniżej udowodnimy szereg własności wielomianów Czebyszewa. Każde z twierdzeń będzie bezpośrednio wykorzystane do wyprowadzenia metody Clenshawa--Nortona. Lematy będą niezbędne w dowodzeniu twierdzeń.
+
+Przyjmijmy następujące oznaczenia :
+$$ T_{k} - \text{ k-ty wielomian Czebyszewa, } $$
+$$u_{j} = \cos{  \frac{j \pi }{N}  } \text{ dla } j=0 \ldots N   - \text{ ekstrema } T_{N}, $$ 
+\begin{equation}
+	\label{eq:dot}
+	\dotproduct{f}{g} = \sumbis{j=0}{N}{f(u_{j}) g(u_{j})} - \text{pewien iloczyn skalarny.} 
+\end{equation}
+
+\begin{lemma}
+	\begin{equation}
+		T_k(\cos{x}) = \cos{kx}
+	\end{equation}
+\end{lemma}
+
+\begin{proof} 
+	(Indukcja)
+	\begin{enumerate}
+		\item dla $k = 0, 1$ równość jest prawdziwa.
+		\item Załóżmy że dla $l < k$ równość jest prawdziwa. Pokażemy że dla $k$ również.
+		\begin{gather*} 
+			T_k(\cos{x}) = 2\cos{x} T_{k-1}(\cos{x}) - T_{k-2}(\cos{x}) = 2 \cos{x} \cos{(k-1)x} - \cos{(k-2)x} = \\
+			= \big( \cos{kx} + \cos{(k-2)x} \big) - \cos{(k-2)x} = \cos{kx}
+		\end{gather*}
+	\end{enumerate}
+\end{proof}
+
+\begin{theorem}
+	\label{th:orthogonality}
+
+	Wielomiany Czebyszwa stopnia nie większego niż $N$ tworzą bazę wielomianów ortogonalnych dla iloczynu skalarnego (\ref{eq:dot}). Ponadto wartości $ \dotproduct{T_k}{T_j} $ zadane są wzorem:
+	
+	\begin{equation}
+		\label{eq:orthogonality}
+  		\dotproduct{T_k}{T_l} =
+  		\begin{cases}
+    	0, & \text{gdy $k \neq l$}\\
+    	\frac{N}{2}, & \text{gdy $k = l$ , $k \neq 0, N$ } \\
+    	N, & \text{gdy $k = l$ , $k =0, N$}
+  		\end{cases}
+	\end{equation}
+	
+	
+\end{theorem}
+
+\begin{proof}
+	\begin{gather*}
+	\dotproduct{T_k}{T_l} = \sumbis{j=0}{N}{ T_k( \cos{ \frac{ j \pi}{N} } ) \cdot T_l( \cos{ \frac{j \pi}{N} } ) } = \sumbis{j=0}{N}{ \cos{ \frac{ k j \pi  }{ N } } \cdot \cos{ \frac{l j \pi}{N} } } = \\
+	= \frac{1}{2} \Big( \sumbis{j=0}{N}{ \cos{ \frac{ (k-l) j \pi }{ N } } }+ 
+	  \sumbis{j=0}{N}{ \cos{ \frac{ (k+l) j \pi }{ N } } } \Big)
+	\end{gather*}
+	
+	Obie sumy mają postać $ \sumbis{j=0}{N}{ \cos{ \frac{ w j \pi }{ N } } } $ dla pewnego $w$. Rozważmy wartości takiej sumy.
+	
+	\begin{lemma}
+		\begin{equation}
+		\sumbis{j=0}{N}{ \cos{ \frac{ w j \pi}{N} } } = 
+		\begin{cases}
+			N, & \text{gdy $w =0, 2N$}\\
+			0, & \text{gdy $0 < w < 2N$}
+		\end{cases}
+		\end{equation}
+	\end{lemma}
+	
+	Korzystając z powyższego lematu mamy:
+	\begin{gather*} 
+	\frac{1}{2} \Big( \sumbis{j=0}{N}{ \cos{ \frac{ (k-l) j \pi}{N} } } + \sumbis{j=0}{N}{ \cos{ \frac{ (k+l) j \pi}{N} } } \Big) = 
+		\begin{cases}
+			\frac{1}{2}(0 + 0) = 0, & \text{gdy $ k \neq l$}\\
+			\frac{1}{2}(N + 0) = \frac{N}{2}, & \text{gdy $ k = l, k \neq 0, N$}\\
+			\frac{1}{2}(N + N) = N, & \text{gdy $k = l, k=0, N$}
+		\end{cases}
+	\end{gather*}
+\end{proof}
+
+\begin{proof} 
+		\textbf{ ( Lematu 2. )} 
+		~
+		\begin{enumerate}
+			\item $ w = 0 $ 
+				\begin{equation} 
+					\sumbis{j=0}{N}{ \cos{ \frac{ w j \pi}{N} } } = \sumbis{j=0}{N}{ \cos{0}} = 								\sumbis{j=0}{N}{ 1 } = N
+				\end{equation}
+			\item $ w = 2N $
+				\begin{equation}
+					\sumbis{j=0}{N}{ \cos{ \frac{ w j \pi}{N} } } = 
+					\sumbis{j=0}{N}{ \cos{ \frac{ 2N j \pi}{N} } } = 
+					\sumbis{j=0}{N}{ \cos{ 2j \pi } } = \sumbis{j=0}{N}{ 1 } = N
+				\end{equation}
+			\item $ 0 < w < 2N $
+				\begin{equation}
+					\label{eq:cossum}
+					\sumbis{j=0}{N}{ \cos{ \frac{ w j \pi}{N} } } = 
+					\sum_{j=0}^{N}{ \cos{ \frac{ w j \pi}{N} } }  - \frac{ \cos{0} }{2} - \frac{ \cos{ w 						\pi}}{2}					
+				\end{equation}
+				\begin{gather*}
+					\sum_{j=0}^{N}{ \cos{ \frac{ w j \pi}{N} } } =
+					\frac{1}{ \sin{ \frac{ w \pi }{2N} } } \sum_{j=0}^{N}{ \sin{ \frac{ w \pi }{2N} } \cdot
+					\cos{ \frac{ w j \pi}{N} } } = \\
+					= \frac{1}{ 2 \sin{ \frac{ w \pi }{2N} } } 
+					\sum_{j=0}^{N}{ \sin{ \frac{(2j +1)w \pi}{2N} } + \sin{ \frac{(1 - 2j)w \pi}{2N}}} = \\
+					= \frac{1}{ 2 \sin{ \frac{ w \pi }{2N} } }
+					\sum_{j=0}^{N}{ - \sin{ \frac{(2j -1)w \pi}{2N}} + \sin{ \frac{(2j +1)w \pi}{2N} }} =\\
+					= \frac{ \sin{ \frac{w \pi}{2N} } +\sin{ ( \frac{k \pi}{2N} +w \pi) }}{  2 \sin{ \frac{ w \pi }{2N} } } = 
+					\begin{cases}
+						0, & \text{ dla $w$ nieparzystych}\\
+						1, & \text{ dla $w$ parzystych}
+					\end{cases}
+				\end{gather*}
+				Wracając do ( \ref{eq:cossum} ) otrzymujemy 
+					$$ \sumbis{j=0}{N}{ \cos{ \frac{ w j \pi}{N} } } = 
+					\begin{cases}
+						0 - \frac{1}{2} + \frac{1}{2} = 0, & \text{ dla $w$ nieparzystych}\\
+						1 - \frac{1}{2} - \frac{1}{2} = 0, & \text{ dla $w$ parzystych}
+					\end{cases}
+					$$
+		\end{enumerate}
+\end{proof} 
+
+\par Kombinację liniową wielomianów Czebyszewa możemy jawnie scałkować. Wystarczy znaleźć zależność między współczynnikami kombinacji liniowej a współczynnikami całki z tej kombinacji.
+
+Poniższy lemat zostanie wykorzystany w twierdzeniu opisującym tę zależność.
+
+\begin{lemma} 
+	\label{le:chebint1}
+	$$ \int T_k = \frac{1}{2}( \frac{ T_{k+1} }{ k+1 } - \frac{ T_{k-1} }{ k-1 } ) \text{ , $k > 1$}$$
+\end{lemma}
+
+\begin{proof}
+	Zastosujmy podstawienie  $ x = \cos{t} $ 
+	\begin{gather*}
+		\int T_k(x) dx = - \int T_k(\cos{t}) \sin{t} dt = -\int \cos{kt}\sin{t} dt = \\
+		= - \frac{1}{2} \int sin(-(k-1)t) + sin((k+1)t) dt  = - \frac{1}{2} \int -sin((k-1)t) + sin((k+1)t) dt = \\
+	= \frac{1}{2} ( \frac{\cos{(k+1)t}}{k+1} - \frac{\cos{(k-1)t}}{k-1} ) = \frac{1}{2}( \frac{ T_{k+1} }{ k+1 } - \frac{ T_{k-1} }{ k-1 } )
+	\end{gather*}
+\end{proof}
+
+
+
+\begin{theorem} 
+	\label{th:chebint2}
+	Załóżmy, że $y$ (kombinacja liniowa wielomianów Czebyszewa) zadana jest wzorem:
+	$$ y = \sumprim{k=0}{N-1}{a'_k T_k} $$
+	Natomiast całka z $y$ wzorem:
+	$$ \int y = \sumprim{k=0}{N}{a_k T_k}$$ 
+	Wtedy
+	\begin{equation}
+		\label{eq:chebint}
+	 a_k = 
+	 \begin{cases}
+	 \frac{1}{2k} ( a'_{k-1} - a'_{k+1} ), & \text{ dla $k=1 \ldots N-2$} \\
+	 \frac{1}{2k} a'_{k-1} , & \text{ dla k=N-1, N} 
+	 \end{cases}
+	\end{equation}
+\end{theorem}
+
+\begin{proof}
+	\begin{gather*}
+		\int y = \int \sumprim{k=0}{N-1}{a'_k T_k} = 
+		\frac{a'_0}{2}x + \frac{a'_1}{2}x^2 + \sum_{k=2}^{N-1}a'_k \int T_k = \\
+		 = \frac{a'_0}{2}x + \frac{a'_1}{2}x^2 + \sum_{k=2}^{N-1} \frac{a'_k}{2}( \frac{T_{k+1}}{k+1} - \frac{T_{k-1}}{k-1} ) + C_1 = \\	
+		= \frac{a'_0}{2}x + \frac{a'_1}{4}(2x^2 - 1) + \sum_{k=2}^{N-1} \frac{a'_k}{2}( \frac{T_{k+1}}{k+1} - \frac{T_{k-1}}{k-1} ) + C_2 = \\
+		\sum_{k=1}^{N-2} \frac{1}{2k}(a'_{k-1} - a'_{k+1}) T_k + \frac{a'_{N-1}}{2N} T_N + 
+		\frac{ a'_{N-2} }{ 2(N-1) } T_{N-1} + C = \sumprim{k=0}{N}{a_k T_k}
+	\end{gather*}
+\end{proof}
+
+\section{Aproksymacja średniokwadratowa}
+
+Zajmiemy się szczególnym przypadkiem aproksymacji średniokwadratowej na zbiorze dyskretnym $  \{ \cos{ \frac{k \pi}{N} }  : k = 0 \ldots N \}$.
+
+\par Można udowodnić, że z ustalonym iloczynem skalarnym $\dotproduct{ \cdot}{\cdot}$ $N$--ty wielomian optymalny w sensie normy średniokwadratowej dla funkcji $f$ wyraża się wzorem:
+\begin{equation} 
+		 \sum_{k=0}^{N} \frac{ \dotproduct{f}{P_k} }{ \dotproduct{P_k}{P_k} } P_k 
+\end{equation}
+gdzie 
+$$ \{ P_k \} \text{-- zbiór wielomianów ortogonalnych z iloczynem skalarnym $\dotproduct{ \cdot}{\cdot}$.} $$
+
+W przypadku aproksymacji dyskretnej na zbiorze $  \{ \cos{ \frac{k \pi}{N} }  : k = 0 \ldots N \}$ wzór ten można uprościć, o czym mówi poniższe twierdzenie.
+
+\begin{theorem}
+	\label{th:appprox}
+	
+	$N$--ty wielomian optymalny w sensie normy średniokwadratowej dla funkcji $f$ z iloczynem skalarnym (\ref{eq:dot}) zadany jest wzorem
+	\begin{equation}
+		\label{eq:approx}
+		W_N^{*} := \sumbis{r=0}{N}{c_r T_r} , \quad  c_r := 
+		\frac{2}{N} \sumbis{s=0}{N}{ f(\cos{\frac{s \pi}{N}}) \cos{\frac{rs \pi}{N}} } 
+	\end{equation}
+\end{theorem}
+
+\begin{proof}
+	Z (\ref{th:orthogonality}) wiemy, że $\{ T_k \}$ jest zbiorem wielomianów ortogonalnych dla iloczynu skalarnego (\ref{eq:dot}). Zatem $N$--ty wielomian optymalny funkcji $f$ w sensie normy średniokwadratowej zadany jest wzorem:
+	$$ \sum_{r=0}^{N} \frac{ \dotproduct{f}{T_r} }{ \dotproduct{T_r}{T_r} } T_r $$
+	Korzystając ze wzoru (\ref{eq:orthogonality}) przekształcamy:
+	\begin{gather*}
+		\sum_{r=0}^{N} \frac{ \dotproduct{f}{T_r} }{ \dotproduct{T_r}{T_r} } T_r = 
+		 \sumbis{r=0}{N}{ \Big[ \frac{2}{N} \sumbis{s=0}{N}{f(u_s) T_r(u_s) } \Big] T_r }  \\
+	\end{gather*}
+	Stąd:
+	\begin{gather*}
+		c_r = \frac{2}{N} \sumbis{s=0}{N}{f(u_s) T_r(u_s)} = 
+		\frac{2}{N} \sumbis{s=0}{N}{ f( \cos{ \frac{s \pi}{N} } )  T_r( \cos{ \frac{s \pi}{N} } ) } = \\
+		= \frac{2}{N} \sumbis{s=0}{N}{ f( \cos{ \frac{s \pi}{N} } )  \cos{ \frac{rs \pi}{N} } }
+	\end{gather*}
+\end{proof}
+
+
+\section{Metoda Clenshawa-Nortona}
+Ideą metody jest wykorzystanie aproksymacji średniokwadratowej funkcji na zbiorze punktów 
+$  \{ \cos{ \frac{k \pi}{N} }  : k = 0 \ldots N \}$  w iteracji Picarda. 
+
+\par 
+	Przypomnijmy, że (\ref{eq:picard}) tworzony był ciąg funkcji $\{ y_i \}$.
+	
+	Za pomocą metody Clenshawa--Nortona będziemy tworzyć ciąg funkcji $\{ \widetilde{y_i} \}$, taki że $\widetilde {y_i} \approx y_i $ dla każdego $i$.
+	
+	\textbf{Zmodyfikujmy iterację Picarda:} \\
+	Przez $W_{N}^{(i-1)}$ oznaczmy $N$--ty wielomian optymalny dla funkcji $f(\widetilde{y}_{i-1}(x), x)$. \\
+	W równaniu (\ref{eq:picard}) pod $f$ podstawmy $W_{N}^{(i-1)}$. Wówczas równanie (\ref{eq:picard}) przyjmuje postać:
+	\begin{equation} 
+		\label{eq:picapprox}
+		\widetilde{y_i} = \eta + \int_{\xi}^{x} W_{N}^{(i-1)}(t) dt
+	\end{equation}
+	Możemy przyjąć że, jeśli
+	$$ \widetilde{y}_{i-1} \approx y_{i-1}$$
+	to
+	$$ f(y_{i-1}(x), x) \approx f( \widetilde{y}_{i-1}(x), x) \approx W_{N}^{(i-1)}$$
+	zatem
+	$$ \eta + \int_{\xi}^{x} W_{N}^{(i-1)}(t) dt \approx \eta + \int_{\xi}^{x} f(y_{i-1}(t), t) dt $$
+	więc
+	$$ \widetilde{y_i} \approx y_i$$
+	~
+
+
+\par Rozważmy sposób, w jaki będzie tworzony ciąg funkcji $\widetilde{y}_0, \widetilde{y}_1, \widetilde{y}_2 , \widetilde{y}_3, \ldots $ \\
+
+\textbf{Cel :} \\
+Dla każdego $i$ funkcja $\widetilde{y_i}$ będzie przedstawiona w postaci:
+\begin{equation}
+	\label{eq:iterform}
+	\widetilde{y_i} = \sumprim{r=0}{N+1}{ A_r^{(i)} T_r }
+\end{equation}
+		
+\textbf{Początek iteracji:} \\
+	Przedstawmy $\widetilde{y}_0 = y_0 = \eta$ jako kombinację liniową wielomianów Czebyszewa 
+	$$ \widetilde{y}_{0} := \sumprim{r=0}{N+1}{A_r^{(0)} T_r}$$
+	gdzie
+	$$ A_0^{(0)} := 2 \eta ,\quad A_r^{(0)} := 0 \quad \text{dla $r > 0$}$$
+
+\textbf{Krok metody:} \\
+	Pokażemy, że jeśli $\widetilde{ y }_{i-1}$ ma postać (\ref{eq:iterform}), to możemy wykonać krok metody i przedstawić $\widetilde{ y_i }$ również w takiej postaci.
+	\par Założmy że
+		$$ \widetilde{ y }_{i-1} = \sumprim{r=0}{N+1}{ A_r^{(i-1)} T_r } $$
+		
+	\par Wyliczamy $f(\widetilde{y}_{i-1}(\chebu{k} ), \chebu{k}) \quad k=0 \ldots N $.
+	\par Znając wartości $f$ w punktach $\{ \chebu{k} \}$ możemy wyliczyć $N$--ty wielomian optymalny dla funkcji $f(\widetilde{y}_{i-1}(x), x)$ korzystając ze wzoru (\ref{eq:approx}). \\
+	Mamy: \\
+	$$ W_N^{(i-1)}(x) := \sumbis{r=0}{N}{C_r^i T_r}(x) \approx f(\widetilde{y}_{i-1}(x), x) $$
+	$$ \sumbis{r=0}{N}{C_r^{(i)} T_r} = \sumprim{r=0}{N}{B_r^{(i)} T_r} 
+	 \text{,  gdzie } B_r^{(i)}= 
+	 \begin{cases} 
+	 	C_r^{(i)}, & \text{ dla $r < N$}\\
+	 	\frac{C_r^{(i)}}{2}, & \text{ dla $r=N$}
+	 \end{cases}$$
+	Więc: \\
+	$$ W_N^{(i-1)}(x) = \sumprim{r=0}{N}{B_r^{(i)} T_r}(x)  \approx f(\widetilde{y}_{i-1}(x), x) $$
+	
+	\par Wyliczamy całkę z $W_N^{(i-1)}(x)$ korzystając ze wzoru (\ref{eq:chebint}):
+		$$ F_i(x) := \Big( \int  W_N^{(i-1)}(t) dt \Big) (x) =  \Big( \int \sumprim{r=0}{N}{B_r^{(i)} T_r(t)}dt \Big)(x)  = C + \sum_{r=1}^{N+1} A_r^{(i)} T_r(x) $$
+	Rozpisując (\ref{eq:picapprox}) otrzymujemy 
+		\begin{gather*}
+		\widetilde{y}_i(x) = \eta + \int_{\xi}^x W_N^{(i-1)}(t) dt = \eta + F_i(x) - F_i(\xi) = \\ 
+		= \sum_{r=1}^{N+1} A_r^{(i)} T_r(x)  + \Big( \eta - \sum_{r=1}^{N+1} A_r^{(i)} T_r(\xi) \Big) = \sumprim{r=0}{N+1}{A_r^{(i)} T_r(x)} 
+		\end{gather*}
+		gdzie
+		$$ A_0^{(i)} := 2 \Big( \eta - \sum_{r=1}^{N+1} A_r^{(i)} T_r(\xi) \Big) $$
+	
+\section{Testy}
+
+\par W przeprowadzanych testach dokładnością wyniku będziemy nazywać największy moduł różnicy między wartością poprawnego rozwiązania, a rozwiązaniem uzyskanym za pomocą metody Clenshawa-Nortona w punktach 
+$ \{ -1 + \frac{2k}{M} : k = 0,1 \ldots M \} $ dla $M = 1000$.
+ 
+\par Badając jakość metody Clenshawa--Nortona warto zwrócić uwagę na następujące zagadnienia:
+\begin{enumerate}
+	\item Wybór kryterium zapewniającego zadaną dokładność wyniku.
+	\item Dokładność wyniku w zależności od wyboru $N$ - długości kombinacji liniowej wielomianów Czebyszewa, którymi aproksymujemy funkcję.
+	\item Dokładność wyniku w zależności od liczby wykonanych iteracji.
+\end{enumerate}
+
+\subsection{Przykłady równań różniczkowych}
+
+Testy będą przeprowadzane na wybranych przykładach równań różniczkowych:
+\begin{enumerate}
+	\item $ f(y, x) =  \frac{5(y-1)}{x-2} - \frac{10x^4}{x-2}, \quad y(1)=2, \quad \textbf{Rozwiązanie: } y(x) = x^5+1$
+	\item $ g(y, x) = y^2, \quad y(-1) =  \frac{2}{5}, \quad \textbf{Rozwiązanie: } y(x) = \frac{1}{\frac{3}{2} -x } $
+	\item $ h(y, x) = 2\cos^2{x} + y \tan{x}, \quad y(0)=1, \quad \textbf{Rozwiązanie: } y(x) = 
+			2\frac{ \sin{x} }{ \cos{x} } - 2 \frac{ \sin^3{x} }{ 3\cos{x} } + \frac{1}{ \cos{x} } $
+	\item $ p(y, x) = -y, \quad y(0) = 1, \quad \textbf{Rozwiązanie: } y = e^{-x}$
+\end{enumerate}
+
+Równania zostały wybrane tak, aby sprawdzić jak najwięcej typów równań różniczkowych.
+
+\subsection{Kryterium dokładności wyniku}
+	\label{sub:kryterium}
+
+\par W metodzie Clenshawa-Nortona trudno jednoznacznie stwierdzić, kiedy uzyskany wynik staje się dokładny. Dlatego warto stworzyć heurystykę na tyle dobrze sprawdzającą sie w praktyce, aby dokładność wyniku była proporcjonalna do dokładności żądanej w heurystyce.
+
+\par Jedną z takich heurystyk może być kryterium podobne do warunku Cauchy'ego zbieżności funkcji. \\
+\textbf{Intuicyjnie:} Jeśli od pewnego momentu kolejne iteracje powodują niewielkie zmiany funkcji $\widetilde{y_i} $, to znaczy, że uzyskaliśmy już dokładny wynik. \\
+\textbf{Ściśle:} \\
+	Załóżmy, że
+	$$ \widetilde{y_i} = \sumprim{r=0}{N+1}{A_r^{(i)} T_r(x)}, \quad  \widetilde{y}_{i+1} = \sumprim{r=0}{N+1}{A_r^{(i+1)} T_r(x)}$$
+	Ustalmy pewien $\varepsilon > 0$. (Wartość $\varepsilon$ będziemy nazywać dokładnością kryterium).\\
+	Jeśli
+	$$ \max_{0 \le r \le N} | A_r^{(i+1)} - A_r^{(i)} | < \varepsilon$$
+	to uznajemy, że uzyskaliśmy wynik z dokładnością $C \cdot \varepsilon$ dla pewnego $C$. 
+	
+	
+\par Sprawdźmy jak powyższa heurystyka sprawdza się w praktyce
+
+\plot{kryterium.png}
+
+Rzeczywiście dokładność wyniku dla każdego równania jest proporcjonalna do dokładności kryterium. Co więcej, w każdym przypadku dokładność wyniku nie przekracza dwukrotności dokładności kryterium.
+
+
+\subsection{Dokładność wyniku w zależności od N oraz liczby iteracji}
+
+\par Można się spodziewać, że im większa liczba iteracji bądź im większe N, tym wynik będzie dokładniejszy. 
+
+\par Zwiększając N otrzymujemy lepsze przybliżenia funkcji przy aproksymacji, z kolei wyniki kolejnych iteracji powinny być coraz bliższe poprawnego wyniku, o ile metoda jest zbieżna.
+
+\par Liczbę dokładnych cyfr dziesiętnych wyniku możemy szacować przez $ -log_{10} m $, gdzie m jest dokładnością wyniku.
+\par Zbadajmy liczbę dokładnych cyfr dziesiętnych w zależności od liczby iteracji przy ustalonym $N = 30$.
+
+\plot{iters.png}
+
+\par Można zauważyć, że zależność jest liniowa i stabilizuje się na poziomie 12-14 dokładnych cyfr dziesiętnych. Jednak w zależności od równania, potrzeba do tego od 15 do aż 35 iteracji. 
+
+\par  Zbadajmy liczbę dokładnych cyfr dziesiętnych w zależności od wartości $N$ przy ustalonej liczbie 30 iteracji.
+
+\plot{n.png}
+
+Można zaobserwować podobne zachowanie, jak w przypadku zależności liczby dokładnych cyfr w zależności od liczby iteracji. 
+
+Oznaczmy $D_{\phi}(N, R)$ jako liczbę dokładnych cyfr dziesiętnych rozwiązania równania $\phi$ w zależności od N oraz liczby iteracji ($R$) . \\
+Na podstawie powyższych obserwacji możemy przypuszczać że 
+$$ D_{\phi}(N, R) = aN + bR,   \text{  dla pewnych $a, b \in \mathbb{R} $}$$
+
+Sprawdźmy powyższą hipotezę na przykładzie równania $f$.
+
+\plot{itersn.png}
+
+Wykres można przybliżyć płaszczyzną, co oznacza, że hipoteza rzeczywiście może być prawdziwa.
+
+\section{Równania wyższych rzędów}
+
+Rozważmy równanie różniczkowe postaci 
+\begin{equation} 
+	\label{eq:difforder}
+	y^{(k)} = f(y^{(k-1)}, y^{(k-2)}, \ldots, y, x), \quad y^{(k-1)}(\xi_{k-1}) = \eta_{k-1},  \ldots y(\xi_0)= \eta_0
+\end{equation}\
+
+Rzędem równania (\ref{eq:difforder}) nazywamy wartość $k$. 
+
+\par Za pomocą metody Clenshawa-Nortona możemy rozwiązywać równania pierwszego rzędu. Można jednak uogólnić tę metodę, aby rozwiązywać równania wyższych rzędów.
+
+\par \textbf{Rozważmy ponownie krok iteracji:} 
+	\par W metodzie Clenshawa-Nortona aproksymujemy pochodną funkcji ($y'$), a następnie wyliczamy funkcję ($y$) całkując pochodną oraz korzystając z warunku początkowego. W każdym kroku funkcja $y$ jest przedstawiona jako kombinacja liniowa wielomianów Czebyszewa.
+\par W uogólnionej metodzie będziemy aproksymować najwyższą pochodną ($y^k$), a niższe pochodne będziemy wyliczać całkując pochodną o jeden wyższą i korzystając z warunków początkowych. Analogicznie, w każdym kroku funkcje $y^{(i)}$ będą przedstawione jako kombinacje liniowe wielomianów Czebyszewa.
+	Korzystając ze wzoru (\ref{eq:chebint}) możemy uzyskać:
+	$$ y^{(i)} = \int y^{(i+1)} = \sum_{r=1}^{N+k-i} A_{r_i} T_r  + C$$ 
+	Wyraz wolny wyliczamy z warunku początkowego:
+	$$ y^{(i)}(\xi_i) = \eta_i $$
+	$$ C = \eta_i - \sum_{r=1}^{N+k-i} A_{r_i} T_r(\xi_i) $$
+	Podstawmy $A_{0_i} := 2C$. \\
+	Wówczas:
+	$$ y^{(i)} =  \sumprim{r=0}{N+k-i} A_{r_i} T_r $$
+	
+\subsection{Testy}
+	W metodzie Clenshawa-Nortona tworzymy ciąg ${\widetilde{y}_i}$, którego każdy element jest bliski $y_i$. W~każdym kroku zakładamy, że przybliżenie jest na tyle dokładne, że nie zaburza oryginalnej iteracji Picarda. W uogólnionym przypadku w każdym kroku zakładamy tak nie tylko dla $y_i$, ale również dla jej $k-1$ pochodnych. Można się więc spodziewać, że im wyższy będzie rząd równania, dla którego szukamy rozwiązania, tym zbieżność metody będzie  wolniejsza.
+	
+\par Rozważmy równanie ruchu harmonicznego:
+	$$f(y', y, x) = - \omega^2 y, \quad y(0) = 1, \quad y'(0)=\frac{1}{2} $$
+	Rozwiązaniem równania jest:
+	$$ y(x) = \cos{\omega x} + \frac{1}{2\omega} \sin{\omega x} $$
+	Sprawdźmy dokładność rozwiązań tego równania dla $\omega = 15 $ po 500 iteracjach w zależności od $N$.
+
+\plot{harmonic.png}
+	Dla $N \le 20 $ metoda nie jest zbieżna (błąd metody to około $10^7$).
+	Warto zauważyć, że pomimo dużej liczby iteracji, dokładność wyników dla $ N \approx 25$ jest mała -- od 3 do 5 dokładnych cyfr dziesiętnych.
+	Dla dużych wartości $N$ metoda uzyskuje wynik z dokładnością do 10 cyfr dziesiętnych.
+	
+\section{Podsumowanie}
+
+\par Dzięki wykorzystaniu aproksymacji średniokwadratowej funkcji na zbiorze dyskretnym możemy w łatwy sposób przeprowadzić iterację Picarda ze względu na proste wzory na całkowanie wielomianów Czebyszewa. Pozwala to na rozwiązywanie skomplikowanych równań różniczkowych, w szczególności nieliniowych oraz wyższych rzędów. 
+
+\par Metoda Clenshawa--Nortona znajduje wielomian przybliżający rozwiązanie równania różniczkowego na przedziale $[ -1, 1 ]$, więc za pomocą przekształceń afinicznych funkcji można przybliżać rozwiązanie na dowolnym przedziale. 
+
+\par W przeciwieństwie do wielu metod rozwiązywania równań różniczkowych, metoda Clenshawa-Nortona znajduje wynik jako funkcję, a nie zbiór wartości w wybranych punktach. 
+
+\par Niestety metoda w ogólności nie ma gwarancji zbieżności. Jednak możemy za jej pomocą uzyskać dokładne wyniki dla wielu istotnych w praktyce równań. 
+
+\par Doświadczenia wykazały, że brak zbieżności może być spowodowany wyborem zbyt małej wartości $N$. Jednak przy użyciu arytmetyki większej precyzji można skutecznie przeprowadzić iteracje dla znacznie większego N.
+
+\par Podsumowując, metoda Clenshawa-Nortona stanowi bardzo silne narzędzie w dziedzinie rozwiązywania równań różniczkowych.
+
+
+\begin{thebibliography}{100}
+\bibitem{article} C. W. Clenshaw, H. J. Norton. \emph{The solution of nonlinear ordinary differential equation in Chebyshev series}. 
+\bibitem{picard} M. A. Ahmed. \emph{A characterization of the convergence of Picard iteration to a fixed point for a continuous mapping and an application}. Assiut University, 2005.
+\bibitem{schwarz} R. Szwarc \emph{Analiza matematyczna ISIM I}.
+\end{thebibliography}
+
+\end{document}
