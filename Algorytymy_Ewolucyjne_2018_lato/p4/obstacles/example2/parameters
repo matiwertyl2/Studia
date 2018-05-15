@@ -1,0 +1,6 @@
+population_size = 100
+number_of_offsprings = 150
+d = 25
+iters = 100
+sigma = 0.5
+number_of_obstacles=15

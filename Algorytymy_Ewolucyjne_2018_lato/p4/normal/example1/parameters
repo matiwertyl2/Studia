@@ -1,0 +1,5 @@
+population_size = 50
+number_of_offsprings = 100
+d = 30
+iters = 60
+sigma = 0.5

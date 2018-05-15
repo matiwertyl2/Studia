@@ -1,0 +1,6 @@
+population_size = 200
+number_of_offsprings = 350
+d = 40
+branches= 4
+iters = 100
+sigma = 0.5
