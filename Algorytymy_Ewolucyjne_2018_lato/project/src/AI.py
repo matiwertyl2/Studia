@@ -1,8 +1,11 @@
 import numpy as np
 import Const as const
 
+from DagNetwork import DagNetwork
+
 class Brain:
 
+    ### network can be either Network or DagNetwork
     def __init__(self, network):
         self.network = network
 
@@ -13,8 +16,8 @@ class Brain:
         return alpha * const.car_max_turn
 
     def scale_inputs(self, inputs):
-        inputs[:5] /= const.car_sensor_length
-        inputs[5] /= const.car_max_speed
+        inputs[:const.car_sensor_count] /= const.car_sensor_length
+        inputs[:const.car_sensor_count] /= const.car_max_speed
         return inputs
 
     ### inputs - some number of sensors and speed

@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib as matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import random
 from matplotlib.patches import Ellipse
@@ -6,6 +8,7 @@ import time
 import timeit
 import matplotlib.animation as animation
 import multiprocessing
+import sys
 
 from Geometry import Polyline, Line, Point
 from Car import Car
@@ -14,6 +17,7 @@ from AI import Brain, Network
 import Simulation as sim
 import EvolUtils as util
 import Const as const
+
 
 ################################################################################
 
@@ -59,6 +63,7 @@ def ES1(objective_function, tracks, population_size=10, number_of_offsprings=10,
 
     results = np.zeros((iters))
     best_sigmas = np.zeros((d, iters))
+    last_saved_value = 0.
 
     for t in range(iters):
 
@@ -84,7 +89,8 @@ def ES1(objective_function, tracks, population_size=10, number_of_offsprings=10,
 
 
         print t, results[t]
-        if t % 5 == 0:
+        if objective_values.max() - last_saved_value > 0.07 or t == iters-1:
+            last_saved_value = objective_values.max()
             np.savetxt('../images/sim/population.txt', population)
             for i in range(len(tracks)):
                 title = "../images/sim/track_" + str(i+1) + "_gen_" + str(t)
@@ -93,22 +99,39 @@ def ES1(objective_function, tracks, population_size=10, number_of_offsprings=10,
     return results, best_sigmas, population
 
 ################################################################################
-tracks = []
-width= const.learn_track_width
-curvature = 0.5
-for t in range(2):
-    track = Track(10, width=width, curvature=curvature, path_type='random', circ_dir='left')
-    plt.axis('equal')
-    track.draw()
-    plt.show()
-    tracks.append(track)
 
-results, sigmas, population = ES1(util.objective_function, tracks, population_size=30,
-                                  number_of_offsprings=30, d=const.chromosome_length,
+def create_tracks(lengths, types=['random', 'random', 'random', 'random'], curvatures=[0.5, 0.5, 0.5, 0.5],
+                circ_dirs=['left', 'left', 'left', 'left']):
+    tracks = []
+    width= const.learn_track_width
+    curvature = 0.5
+    for i in range(len(lengths)):
+        track = Track(lengths[i], width=width, curvature=curvatures[i], path_type=types[i], circ_dir=circ_dirs[i])
+        plt.axis('equal')
+        track.draw()
+        plt.savefig('../images/sim/track' + str(i+1))
+        plt.clf()
+        tracks.append(track)
+    return tracks
+
+
+lengths = [50, 50, 50, 50]
+tracks = None
+
+while True:
+    tracks = create_tracks(lengths)
+    acc = raw_input("Do you accept tracks?\n")
+    if acc == "yes":
+        break
+    elif acc == "exit":
+        sys.exit()
+
+results, sigmas, population = ES1(util.objective_function, tracks, population_size=50,
+                                  number_of_offsprings=50, d=const.chromosome_length,
                                   rmin=-1, rmax=1, sigma=1, tau=1./np.sqrt(64.),
-                                  tau0=1./np.sqrt(2*np.sqrt(64.)), iters=81,
+                                  tau0=1./np.sqrt(2*np.sqrt(64.)), iters=101,
                                   layers_shape=const.network_layers_shape,
-                                  frames_limit=10)
+                                  frames_limit=110)
 
 np.savetxt('../images/sim/population.txt', population)
 np.savetxt('../images/sim/results.txt', results)

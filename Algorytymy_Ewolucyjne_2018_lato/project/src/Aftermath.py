@@ -11,35 +11,38 @@ from Car import Car
 from Track import Track
 from AI import Brain, Network
 import Simulation as sim
-
-def create_car(gene, layers_shape):
-    layers = []
-    beg = 0
-    end = layers_shape[0][0] * layers_shape[0][1]
-    for layer_shape in layers_shape:
-        layers.append( gene[beg:end].reshape(layer_shape) )
-        beg = end
-        end += layer_shape[0]*layer_shape[1]
-
-    initial_position = Point(-4., 4.)
-    initial_angle = np.pi/2
-    initial_speed = 0.
-    brain = Brain(Network(layers))
-    return Car(initial_position, initial_angle, initial_speed, brain)
+import EvolUtils as util
+from Track import create_benchmarks
+import Const as const
+from Braindraw import draw_network
 
 
-def create_cars(genes, layers_shape):
-    cars = []
-    for gene in genes:
-        cars.append(create_car(gene, layers_shape))
-    return cars
+genes = np.loadtxt('../images/sim/population.txt')
+
+gene = np.loadtxt('../images/sim/population.txt')[0]
+
+layers_shape = const.network_layers_shape
+layers = []
+beg = 0
+end = 0
+for layer_shape in layers_shape:
+    beg = end
+    end += layer_shape[0]*layer_shape[1]
+    layers.append( gene[beg:end].reshape(layer_shape) )
 
 
-genes = np.loadtxt('sim/population.txt')
+network = Network(layers)
+draw_network(network)
 
-cars = create_cars(genes[:1, :64], [(6, 8), (8, 2)])
-track = Track(100)
-plt.axis('equal')
-track.draw()
-plt.show()
-sim.simulation_movie(track, cars, title='sim/after', frames_limit=200, show_demo=True, save=True)
+cars = util.create_cars(genes[:5, :genes.shape[1]/2 ], const.network_layers_shape)
+track = Track(10)
+sim.simulation_movie(track, cars, title='sim/after', frames_limit=30, show_demo=True, save=False)
+
+
+tracks = create_benchmarks()
+for track in tracks:
+    plt.axis('equal')
+    track[0].draw()
+    plt.show()
+    cars = util.create_cars(genes[:1, :genes.shape[1]/2 ], const.network_layers_shape)
+    #sim.simulation_movie(track[0], cars, title='sim/after', frames_limit=track[1], show_demo=True, save=False)

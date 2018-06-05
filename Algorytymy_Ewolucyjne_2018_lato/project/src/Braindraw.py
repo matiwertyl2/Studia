@@ -61,6 +61,8 @@ def draw_network(network):
 
 
 
+
+
 gene = np.loadtxt('../images/sim/population.txt')[0]
 
 layers_shape = const.network_layers_shape

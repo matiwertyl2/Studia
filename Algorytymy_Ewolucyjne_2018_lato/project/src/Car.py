@@ -98,6 +98,10 @@ class Car:
         self.pos = pos
         self.alpha = alpha
 
+    def restart(self):
+        self.finished = False
+        self.crashed = False
+
     def get_inputs(self, track):
         sensors = self.get_sensors(track)
         inputs = np.zeros(const.car_sensor_count+1)
