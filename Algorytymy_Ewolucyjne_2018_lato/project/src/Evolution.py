@@ -13,12 +13,13 @@ import sys
 from Geometry import Polyline, Line, Point
 from Car import Car
 from Track import Track
-from AI import Brain, Network
+from Brain import Brain
+from Network import  Network
 import Simulation as sim
 import EvolUtils as util
 import Const as const
 
-
+path_root = "../images/sim/"
 ################################################################################
 
 def mutation(gene, tau, tau0):
@@ -91,9 +92,9 @@ def ES1(objective_function, tracks, population_size=10, number_of_offsprings=10,
         print t, results[t]
         if objective_values.max() - last_saved_value > 0.07 or t == iters-1:
             last_saved_value = objective_values.max()
-            np.savetxt('../images/sim/population.txt', population)
+            np.savetxt(path_root + 'population.txt', population)
             for i in range(len(tracks)):
-                title = "../images/sim/track_" + str(i+1) + "_gen_" + str(t)
+                title = path_root + "track_" + str(i+1) + "_gen_" + str(t)
                 sim.simulation_movie(tracks[i], util.create_cars(population[:5, :d], layers_shape), title=title, frames_limit=frames_limit, show_demo=False, save=True)
 
     return results, best_sigmas, population
@@ -109,7 +110,7 @@ def create_tracks(lengths, types=['random', 'random', 'random', 'random'], curva
         track = Track(lengths[i], width=width, curvature=curvatures[i], path_type=types[i], circ_dir=circ_dirs[i])
         plt.axis('equal')
         track.draw()
-        plt.savefig('../images/sim/track' + str(i+1))
+        plt.savefig(path_root + 'track' + str(i+1))
         plt.clf()
         tracks.append(track)
     return tracks
@@ -133,6 +134,6 @@ results, sigmas, population = ES1(util.objective_function, tracks, population_si
                                   layers_shape=const.network_layers_shape,
                                   frames_limit=110)
 
-np.savetxt('../images/sim/population.txt', population)
-np.savetxt('../images/sim/results.txt', results)
-np.savetxt('../images/sim/sigmas.txt', sigmas)
+np.savetxt(path_root + 'population.txt', population)
+np.savetxt(path_root + 'results.txt', results)
+np.savetxt(path_root + 'sigmas.txt', sigmas)

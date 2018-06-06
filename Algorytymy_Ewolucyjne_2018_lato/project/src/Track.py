@@ -38,7 +38,6 @@ def circular(n, circ_dir):
     sgn = -1 ### turn right
     if circ_dir == 'left':
         sgn = 1
-    print "sgn ", sgn
     for i in range(n):
         a += 0.2 * sgn
         l = 2*np.sqrt(i+10);
@@ -50,14 +49,14 @@ def circular(n, circ_dir):
     return Polyline(lines)
 
 def horseshoe(n, circ_dir):
-    lines = [Line(Point(0., 0.), Point(0., 10.*n))]
+    lines = [Line(Point(0., 0.), Point(1., 10.*n))]
     a = np.pi/2
-    xprv = 0
+    xprv = 1.
     yprv = 10.*n
     sgn = -1
     if circ_dir == 'left':
         sgn = 1
-    for i in range(10):
+    for i in range(9):
         a += np.pi / 10 * sgn
         x = xprv + 10*np.cos(a)
         y = yprv + 10*np.sin(a)
@@ -130,26 +129,27 @@ class Track:
 
 ### return tuples of tracks and frame limits
 def create_benchmarks():
+    width = const.learn_track_width * 1.5
     benchmarks = []
-    t = Track(50, path_type='circular', circ_dir="left")
-    frames_limit = 100
+    t = Track(50, path_type='circular', circ_dir="left", width=width)
+    frames_limit = 250
     benchmarks.append((t, frames_limit))
-    t = Track(50, path_type='circular', circ_dir="right")
-    frames_limit = 100
+    t = Track(50, path_type='circular', circ_dir="right", width=width)
+    frames_limit = 250
     benchmarks.append((t, frames_limit))
-    t = Track(0, path_type='serpent', sharpness=15)
-    frames_limit= 200
+    t = Track(0, path_type='serpent', sharpness=15, width=width)
+    frames_limit= 300
     benchmarks.append((t, frames_limit))
-    t = Track(0, path_type='serpent', sharpness=8)
+    t = Track(0, path_type='serpent', sharpness=8, width=width)
     frames_limit = 200
     benchmarks.append((t, frames_limit))
-    t = Track(10, path_type='horseshoe', circ_dir="left")
+    t = Track(10, path_type='horseshoe', circ_dir="left", width=width)
+    frames_limit = 150
+    benchmarks.append((t, frames_limit))
+    t = Track(10, path_type='horseshoe', circ_dir="right", width=width)
+    frames_limit=150
+    benchmarks.append((t, frames_limit))
+    t = Track(30, path_type='straight', width=width)
     frames_limit = 100
-    benchmarks.append((t, frames_limit))
-    t = Track(10, path_type='horseshoe', circ_dir="right")
-    frames_limit=100
-    benchmarks.append((t, frames_limit))
-    t = Track(30, path_type='straight')
-    frames_limit = 50
     benchmarks.append((t, frames_limit))
     return benchmarks

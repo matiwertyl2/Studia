@@ -5,7 +5,7 @@ frame_dt = 0.1
 
 car_width = 2.
 car_length = 4.
-car_max_speed = 50.
+car_max_speed = 39.
 car_max_turn = 0.2
 car_max_acc = 1.2
 car_sensor_length = 30.

@@ -11,11 +11,13 @@ import sys
 from Geometry import Polyline, Line, Point
 from Car import Car
 from Track import Track
-from AI import Brain
+from Brain import Brain
 from DagNetwork import DagNetwork
 import Simulation as sim
 import Const as const
 import DagNetwork as dag
+
+path_root = "../images/simdag/"
 
 
 def initial_car(network):
@@ -62,6 +64,7 @@ def parent_selection(objective_values, population_size, number_of_offsprings):
         if parent_indices[2*i] == parent_indices[2*i+1]:
             parent_indices[2*i+1] = np.random.choice(population_size)
     return parent_indices
+
 
 
 def SGA(population_size=10, number_of_offsprings=10, n=22, edge_mutation_probability=0.2,
@@ -116,14 +119,13 @@ def SGA(population_size=10, number_of_offsprings=10, n=22, edge_mutation_probabi
 
         if objective_values.max() - last_saved_value > 0.07 or t == iters-1:
             last_saved_value = objective_values.max()
-            #save_population(population)
-            np.savetxt('../images/simdag/results.txt', results)
+            dag.save_population(population)
+            np.savetxt(path_root + 'results.txt', results)
             for i in range(len(tracks)):
-                title = "../images/simdag/track_" + str(i+1) + "_gen_" + str(t)
+                title = path_root + "track_" + str(i+1) + "_gen_" + str(t)
                 sim.simulation_movie(tracks[i], create_cars(population[:5]), title=title, frames_limit=frames_limit, show_demo=False, save=True)
 
-
-
+    return results, population
 
 
 #############################################################################################
@@ -139,12 +141,12 @@ def create_tracks(lengths, types=['random', 'random', 'random', 'random'], curva
         track = Track(lengths[i], width=width, curvature=curvatures[i], path_type=types[i], circ_dir=circ_dirs[i])
         plt.axis('equal')
         track.draw()
-        plt.savefig('../images/simdag/track' + str(i+1))
+        plt.savefig(path_root + 'track' + str(i+1))
         plt.clf()
         tracks.append(track)
     return tracks
 
-lengths = [30, 30, 30, 30]
+lengths = [50, 50, 50, 50]
 tracks = None
 
 while True:
@@ -155,4 +157,7 @@ while True:
     elif acc == "exit":
         sys.exit()
 
-SGA(tracks=tracks, population_size=100, number_of_offsprings=100, iters=150, frames_limit=70)
+results, population = SGA(tracks=tracks, population_size=100, number_of_offsprings=100, iters=101, frames_limit=110)
+
+dag.save_population(population)
+np.savetxt(path_root + "results.txt", results)

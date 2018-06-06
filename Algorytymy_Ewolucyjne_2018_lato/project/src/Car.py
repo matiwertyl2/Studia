@@ -8,7 +8,7 @@ import matplotlib.animation as animation
 
 from Track import Track
 from Geometry import Polyline, Line, Point
-from AI import Brain
+from Brain import Brain
 import Geometry as Geo
 import Const as const
 

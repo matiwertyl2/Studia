@@ -9,7 +9,8 @@ import matplotlib.animation as animation
 from Geometry import Polyline, Line, Point
 from Car import Car
 from Track import Track
-from AI import Brain, Network
+from Brain import Brain
+from Network import Network
 import Simulation as sim
 import Const as const
 

@@ -2,6 +2,7 @@ import numpy as np
 import Const as const
 
 from DagNetwork import DagNetwork
+from Network import Network
 
 class Brain:
 
@@ -17,7 +18,7 @@ class Brain:
 
     def scale_inputs(self, inputs):
         inputs[:const.car_sensor_count] /= const.car_sensor_length
-        inputs[:const.car_sensor_count] /= const.car_max_speed
+        inputs[const.car_sensor_count] /= const.car_max_speed
         return inputs
 
     ### inputs - some number of sensors and speed
@@ -28,15 +29,3 @@ class Brain:
         decision[0] = self.scale_speed(decision[0])
         decision[1] = self.scale_turn(decision[1])
         return decision
-
-
-class Network:
-
-    ### layers - list of arrays responsible for wieghts
-    def __init__(self, layers):
-        self.layers = layers
-
-    def feed_forward(self, inputs):
-        for layer in self.layers:
-            inputs = np.tanh(np.dot(inputs, layer))
-        return inputs

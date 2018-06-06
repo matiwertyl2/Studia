@@ -1,48 +1,51 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random
-from matplotlib.patches import Ellipse
-import time
-import timeit
-import matplotlib.animation as animation
 
-from Geometry import Polyline, Line, Point
 from Car import Car
 from Track import Track
-from AI import Brain, Network
+from Brain import Brain
+from Network import Network
+import Network as net
+import DagNetwork as dag
 import Simulation as sim
-import EvolUtils as util
 from Track import create_benchmarks
+from Geometry import Point, Line, Polyline
 import Const as const
-from Braindraw import draw_network
+import Movies as movies
 
+def initial_car(network):
+    initial_position = Point(const.car_initial_x, const.car_initial_y)
+    initial_angle = const.car_initial_angle
+    initial_speed = const.car_initial_speed
+    return Car(initial_position, initial_angle, initial_speed, Brain(network))
 
-genes = np.loadtxt('../images/sim/population.txt')
-
-gene = np.loadtxt('../images/sim/population.txt')[0]
-
+network = None
+path_root = ""
 layers_shape = const.network_layers_shape
-layers = []
-beg = 0
-end = 0
-for layer_shape in layers_shape:
-    beg = end
-    end += layer_shape[0]*layer_shape[1]
-    layers.append( gene[beg:end].reshape(layer_shape) )
 
 
-network = Network(layers)
-draw_network(network)
+choice = raw_input("Select Evolution type you want to assess (normal / dag)\n")
+if choice == "normal":
+    path_root = '../images/sim/'
+    gene = np.loadtxt(path_root + 'population.txt')[0]
+    network = net.create_network(gene, layers_shape)
+    network.draw()
+else:
+    path_root = "../images/simdag/"
+    network = dag.load_population(path_root+'population.txt')[0]
+    network.draw()
+    movies.dag_brain_movie(path_root)
 
-cars = util.create_cars(genes[:5, :genes.shape[1]/2 ], const.network_layers_shape)
-track = Track(10)
-sim.simulation_movie(track, cars, title='sim/after', frames_limit=30, show_demo=True, save=False)
+################################################################################
 
+movies.learning_movie(path_root)
 
 tracks = create_benchmarks()
-for track in tracks:
-    plt.axis('equal')
-    track[0].draw()
-    plt.show()
-    cars = util.create_cars(genes[:1, :genes.shape[1]/2 ], const.network_layers_shape)
-    #sim.simulation_movie(track[0], cars, title='sim/after', frames_limit=track[1], show_demo=True, save=False)
+for i in range(len(tracks)):
+    track = tracks[i]
+    cars = [initial_car(network)]
+    title = path_root + "benchmark_" + str(i)
+    sim.simulation_movie(track[0], cars, title=title, frames_limit=track[1], show_demo=False, save=True)
+
+movies.benchmark_movie(path_root)

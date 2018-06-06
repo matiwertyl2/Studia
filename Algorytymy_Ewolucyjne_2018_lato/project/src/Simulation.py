@@ -9,7 +9,7 @@ import matplotlib.animation as animation
 from Geometry import Polyline, Line, Point
 from Car import Car
 from Track import Track
-from AI import Brain
+from Brain import Brain
 import Const as const
 
 def simulation_movie(track, cars, title='simulation', frames_limit=100, show_demo=False, save=True):
