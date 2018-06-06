@@ -19,7 +19,7 @@ import Simulation as sim
 import EvolUtils as util
 import Const as const
 
-path_root = "../images/sim/"
+path_root = const.evolution_path_root
 ################################################################################
 
 def mutation(gene, tau, tau0):
@@ -56,7 +56,7 @@ def parent_selection(objective_values, number_of_offsprings):
     return np.random.choice(len(fitness_values), (number_of_offsprings, 2), True, fitness_values).astype(np.int64)
 
 
-def ES1(objective_function, tracks, population_size=10, number_of_offsprings=10, d=32, rmin=-1, rmax=1,
+def evolve_network(objective_function, tracks, population_size=10, number_of_offsprings=10, d=32, rmin=-1, rmax=1,
         sigma=1, tau=1., tau0=1., iters=10, layers_shape=[], frames_limit=100):
 
     population = initial_population(population_size, sigma, d, rmin, rmax)
@@ -127,7 +127,7 @@ while True:
     elif acc == "exit":
         sys.exit()
 
-results, sigmas, population = ES1(util.objective_function, tracks, population_size=50,
+results, sigmas, population = evolve_network(util.objective_function, tracks, population_size=50,
                                   number_of_offsprings=50, d=const.chromosome_length,
                                   rmin=-1, rmax=1, sigma=1, tau=1./np.sqrt(64.),
                                   tau0=1./np.sqrt(2*np.sqrt(64.)), iters=101,

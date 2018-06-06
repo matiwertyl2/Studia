@@ -17,7 +17,7 @@ import Simulation as sim
 import Const as const
 import DagNetwork as dag
 
-path_root = "../images/simdag/"
+path_root = const.dag_evolution_path_root
 
 
 def initial_car(network):
@@ -67,7 +67,9 @@ def parent_selection(objective_values, population_size, number_of_offsprings):
 
 
 
-def SGA(population_size=10, number_of_offsprings=10, n=22, edge_mutation_probability=0.2,
+### n is the upper bound for number of vertices in network
+### other variables speak for themselves
+def evolve_dag(population_size=10, number_of_offsprings=10, n=22, edge_mutation_probability=0.2,
         weight_mutation_probability=1., iters=10, tracks=[], frames_limit=25):
 
     population = initial_population(population_size, n)
@@ -157,7 +159,7 @@ while True:
     elif acc == "exit":
         sys.exit()
 
-results, population = SGA(tracks=tracks, population_size=100, number_of_offsprings=100, iters=101, frames_limit=110)
+results, population = evolve_dag(tracks=tracks, population_size=100, number_of_offsprings=100, iters=101, frames_limit=110)
 
 dag.save_population(population)
 np.savetxt(path_root + "results.txt", results)

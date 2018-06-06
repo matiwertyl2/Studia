@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from Geometry import Line, Point, Polyline
+import Const as const
 
 class Network:
 
@@ -43,7 +44,7 @@ class Network:
                 plt.plot(X, Y, zorder=abs(line[2]), color=line[1], linewidth=line[2])
 
 
-    def draw(self, save=False, path_root='../images/sim/'):
+    def draw(self, save=False, path_root=const.evolution_path_root):
 
         point_distance = 5
         layer_distance = 10

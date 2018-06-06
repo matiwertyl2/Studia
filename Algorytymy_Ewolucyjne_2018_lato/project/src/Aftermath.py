@@ -27,12 +27,12 @@ layers_shape = const.network_layers_shape
 
 choice = raw_input("Select Evolution type you want to assess (normal / dag)\n")
 if choice == "normal":
-    path_root = '../images/sim/'
+    path_root = const.evolution_path_root
     gene = np.loadtxt(path_root + 'population.txt')[0]
     network = net.create_network(gene, layers_shape)
-    network.draw()
+    network.draw(save=True)
 else:
-    path_root = "../images/simdag/"
+    path_root = const.dag_evolution_path_root
     network = dag.load_population(path_root+'population.txt')[0]
     network.draw()
     movies.dag_brain_movie(path_root)

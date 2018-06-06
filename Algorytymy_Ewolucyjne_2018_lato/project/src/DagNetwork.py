@@ -89,7 +89,7 @@ class DagNetwork:
                         color = "blue"
                     plt.plot(X, Y, zorder=abs(self.weights[i][j]), color=color, linewidth=self.weights[i][j])
         if save:
-            plt.savefig('../images/simdag/brain' + str(nr))
+            plt.savefig(const.dag_evolution_path_root + 'brain' + str(nr))
         else:
             plt.show()
 
