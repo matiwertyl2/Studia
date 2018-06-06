@@ -199,7 +199,7 @@ def random_DagNetwork(n):
     return DagNetwork(edges, weights=weights)
 
 
-def save_population(population, path_root = '../images/simdag/'):
+def save_population(population, path_root = const.dag_evolution_path_root):
     path = path_root + "population.txt"
     n = population[0].n
     arr = np.zeros((len(population)*n, 2*n))
@@ -208,7 +208,7 @@ def save_population(population, path_root = '../images/simdag/'):
         arr[ i*n:(i+1)*n, n:2*n] = population[i].weights
     np.savetxt(path, arr)
 
-def load_population(path = '../images/simdag/population.txt'):
+def load_population(path = const.dag_evolution_path_root + 'population.txt'):
     arr = np.loadtxt(path)
     n = arr.shape[1] / 2
     population = []
