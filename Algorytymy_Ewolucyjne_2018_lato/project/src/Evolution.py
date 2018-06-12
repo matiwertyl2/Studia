@@ -116,7 +116,7 @@ def create_tracks(lengths, types=['random', 'random', 'random', 'random'], curva
     return tracks
 
 
-lengths = [5, 5, 5, 5]
+lengths = [50, 50, 50, 50]
 tracks = None
 
 while True:
@@ -127,12 +127,12 @@ while True:
     elif acc == "exit":
         sys.exit()
 
-results, sigmas, population = evolve_network(util.objective_function, tracks, population_size=5,
-                                  number_of_offsprings=5, d=const.chromosome_length,
+results, sigmas, population = evolve_network(util.objective_function, tracks, population_size=50,
+                                  number_of_offsprings=50, d=const.chromosome_length,
                                   rmin=-1, rmax=1, sigma=1, tau=1./np.sqrt(64.),
-                                  tau0=1./np.sqrt(2*np.sqrt(64.)), iters=11,
+                                  tau0=1./np.sqrt(2*np.sqrt(64.)), iters=101,
                                   layers_shape=const.network_layers_shape,
-                                  frames_limit=10)
+                                  frames_limit=110)
 
 np.savetxt(path_root + 'population.txt', population)
 np.savetxt(path_root + 'results.txt', results)

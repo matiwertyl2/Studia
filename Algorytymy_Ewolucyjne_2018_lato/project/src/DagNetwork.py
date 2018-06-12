@@ -109,11 +109,8 @@ class DagNetwork:
         return values[-2:]
 
     def edge_mutation(self):
-        print "edge mutation"
         p  = 1. / (self.n)
         self.edge_change_probability *= np.exp(np.random.normal(0, self.sigma/5))
-        print self.edge_change_probability, "CHANGE"
-        print self.sigma, "SIGMA"
         for i in range(self.n):
             for j in range(self.n):
                 if np.random.random() < self.edge_change_probability and j > i:
@@ -123,7 +120,6 @@ class DagNetwork:
 
 
     def weight_mutation(self, L, U, mi=20):
-        print "weight mutation"
         tau=1./self.n
         tau0=1./np.sqrt(2*(self.n))
         self.sigma = self.sigma * np.exp(np.random.normal(0, tau)  + np.random.normal(0, tau0) )
@@ -131,11 +127,6 @@ class DagNetwork:
             for j in range(self.n):
                 if np.random.random() < 0.5:
                     self.weights[i][j] += np.random.normal(0, self.sigma)
-                    #u = np.random.random()
-                    #if u < 0.5:
-                        #self.weights[i][j] = self.weights[i][j] + ( np.power(2*u, 1/(1.+mi)) - 1 ) * (self.weights[i][j] - L)
-                    #else:
-                        #self.weights[i][j] = self.weights[i][j] + (1 - np.power(2*(1-u), 1/(1.+mi) ) ) * (U - self.weights[i][j])
 
 
 
